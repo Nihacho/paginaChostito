@@ -1,6 +1,6 @@
 "use client"
 
-import coffeLogo from "../assets/Chostito.png";
+import logo from "../assets/Chostito.png"
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 
@@ -33,7 +33,7 @@ function Navbar() {
         <Link to="/" className="navbar-logo">
           <div className="logo-image">
             <img
-              src= {coffeLogo}
+              src={logo}
               alt="Café Chostito Logo"
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -42,7 +42,7 @@ function Navbar() {
               }}
             />
           </div>
-          <span className="logo-text hidden sm:block">Café Chostito</span>
+          <span className="logo-text hidden sm:block">Coffe Chostito</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -59,8 +59,8 @@ function Navbar() {
           <Link to="/merchandising" className={location.pathname === "/merchandising" ? "text-green-200" : ""}>
             Merchandising
           </Link>
-          <Link to="/contacto" className={location.pathname === "/contacto" ? "text-green-200" : ""}>
-            Contáctenos
+          <Link to="/reservar" className={location.pathname === "/reservar" ? "text-green-200" : ""}>
+            Reservar
           </Link>
         </div>
 
@@ -116,11 +116,11 @@ function Navbar() {
             Merchandising
           </Link>
           <Link
-            to="/contacto"
+            to="/reservar"
             onClick={() => setIsMenuOpen(false)}
-            className={location.pathname === "/contacto" ? "text-green-200" : ""}
+            className={location.pathname === "/reservar" ? "text-green-200" : ""}
           >
-            Contáctenos
+            Reservar
           </Link>
         </div>
       )}

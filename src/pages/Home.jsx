@@ -54,29 +54,25 @@ function Home() {
             }}
           />
         </div>
-        <br />
-        <br />
-      
         <div className="relative flex flex-col items-center justify-center h-full text-center text-white px-4 hero-content">
           <h1 className="hero-title">Café Chostito</h1>
           <p className="hero-subtitle">Donde cada sorbo cuenta una historia</p>
-          <Link to="/menu" className="btn">
-            Explorar Menú
-          </Link>
+          <br />
+          <br />
+          <br />
+          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            <Link to="/menu" className="btn">
+              Explorar Menú
+            </Link>
+            <Link to="/reservar" className="btn btn-secondary">
+              Reservar Mesa
+            </Link>
+          </div>
         </div>
       </section>
 
+      
       {/* Welcome Section */}
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
       <section
         id="welcome-section"
         className={`section ${isVisible.welcome ? "animate-fade-in" : ""}`}
@@ -92,6 +88,10 @@ function Home() {
             <div className="section-divider"></div>
             <p className="section-subtitle">Una experiencia única de café en un ambiente acogedor</p>
           </div>
+
+          <br />
+          <br />
+          <br />
 
           <div className="grid sm-grid-cols-2 gap-12 items-center">
             <div>
@@ -247,37 +247,15 @@ function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="section">
+      {/* Reservation CTA Section */}
+      <section className="section bg-green-700 text-white">
         <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="section-title">Lo Que Dicen Nuestros Clientes</h2>
-            <div className="section-divider"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                <div className="flex items-center mb-4">
-                  <div className="text-yellow-400 flex">
-                    {[...Array(5)].map((_, i) => (
-                      <svg
-                        key={i}
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-                <p className="italic mb-4">"{testimonial.text}"</p>
-                <p className="font-semibold">{testimonial.name}</p>
-              </div>
-            ))}
+          <div className="text-center">
+            <h2 className="section-title text-white">¿Listo para visitarnos?</h2>
+            <p className="text-xl mb-8">Reserva tu mesa ahora y disfruta de la mejor experiencia de café</p>
+            <Link to="/reservar" className="btn btn-white">
+              Reservar Mesa
+            </Link>
           </div>
         </div>
       </section>
@@ -304,20 +282,23 @@ const featuredProducts = [
     price: "5.25",
     image: "https://images.unsplash.com/photo-1586917049334-dc082efcf137?q=80&w=600",
   },
-]
-
-const testimonials = [
   {
-    name: "María González",
-    text: "El mejor café que he probado en la ciudad. El ambiente es perfecto para trabajar y los baristas son muy amables.",
+    name: "Espresso Doble",
+    description: "Doble shot de nuestro mejor espresso, intenso y aromático",
+    price: "3.50",
+    image: "https://images.unsplash.com/photo-1610889556528-9a770e32642f?q=80&w=600",
   },
   {
-    name: "Carlos Rodríguez",
-    text: "Los croissants son increíbles, siempre frescos y deliciosos. Vengo todos los días antes del trabajo.",
+    name: "Tarta de Chocolate",
+    description: "Deliciosa tarta de chocolate con ganache y frutos rojos",
+    price: "5.50",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=600",
   },
   {
-    name: "Laura Martínez",
-    text: "Me encanta el ambiente acogedor y la música. Es mi lugar favorito para reunirme con amigos.",
+    name: "Sandwich Vegetariano",
+    description: "Pan artesanal con hummus, aguacate y vegetales frescos",
+    price: "6.25",
+    image: "https://images.unsplash.com/photo-1540914124281-342587941389?q=80&w=600",
   },
 ]
 
