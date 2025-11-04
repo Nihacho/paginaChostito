@@ -158,7 +158,7 @@ function Contacto() {
                 </svg>
               </div>
               <div className="contact-text">
-                <h3>Horario de Atención</h3>
+                <h3>Horarios</h3>
                 <p>Lunes a Viernes: 7:00 - 21:00</p>
                 <p>Sábados y Domingos: 8:00 - 20:00</p>
               </div>

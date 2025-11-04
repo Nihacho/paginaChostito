@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { ReservasProvider } from "./context/ReservasContext"
 import Navbar from "./components/Navbar"
+import ScrollToTop from "./components/ScrollToTop"  // ✅ AGREGAR ESTA LÍNEA
 import Home from "./pages/Home"
 import Menu from "./pages/Menu"
 import Delivery from "./pages/Delivery"
@@ -15,6 +16,7 @@ function App() {
   return (
     <ReservasProvider>
       <Router>
+        <ScrollToTop />  {/* ✅ AGREGAR ESTA LÍNEA - Debe estar dentro de Router pero antes de todo lo demás */}
         <div className="app">
           <Navbar />
           <main className="content">

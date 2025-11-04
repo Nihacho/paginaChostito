@@ -1,84 +1,66 @@
 function Menu() {
   return (
-    <div className="container py-8">
-      <h1 className="section-title">Nuestro Menú</h1>
-
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6 text-green-700">Cafés</h2>
-        <div className="grid sm-grid-cols-2 lg-grid-cols-3 gap-6">
-          {coffees.map((item, index) => (
-            <div key={index} className="card">
-              <img
-                src={item.image || "/placeholder.svg"}
-                alt={item.name}
-                className="card-image"
-                onError={(e) => {
-                  e.target.onerror = null
-                  e.target.src = `https://placehold.co/600x400/1e7d36/ffffff?text=${item.name.replace(/ /g, "+")}`
-                }}
-              />
-              <div className="card-content">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{item.name}</h3>
-                  <span className="font-bold text-green-700">${item.price}</span>
-                </div>
-                <p className="text-gray-600 text-sm">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="container py-12">
+      {/* CORREGIDO: Agregado padding top y mejor espaciado */}
+      <div className="text-center mb-12">
+        <h1 className="section-title">Nuestro Menú</h1>
+        <div className="section-divider"></div>
+        <p className="section-subtitle">Descubre nuestra selección de cafés, postres y bocadillos</p>
       </div>
 
-      <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6 text-green-700">Postres</h2>
-        <div className="grid sm-grid-cols-2 lg-grid-cols-3 gap-6">
-          {desserts.map((item, index) => (
-            <div key={index} className="card">
-              <img
-                src={item.image || "/placeholder.svg"}
-                alt={item.name}
-                className="card-image"
-                onError={(e) => {
-                  e.target.onerror = null
-                  e.target.src = `https://placehold.co/600x400/1e7d36/ffffff?text=${item.name.replace(/ /g, "+")}`
-                }}
-              />
-              <div className="card-content">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{item.name}</h3>
-                  <span className="font-bold text-green-700">${item.price}</span>
-                </div>
-                <p className="text-gray-600 text-sm">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Sección de Cafés */}
+      <MenuSection title="Cafés" items={coffees} />
 
-      <div>
-        <h2 className="text-2xl font-semibold mb-6 text-green-700">Bocadillos</h2>
-        <div className="grid sm-grid-cols-2 lg-grid-cols-3 gap-6">
-          {snacks.map((item, index) => (
-            <div key={index} className="card">
-              <img
-                src={item.image || "/placeholder.svg"}
-                alt={item.name}
-                className="card-image"
-                onError={(e) => {
-                  e.target.onerror = null
-                  e.target.src = `https://placehold.co/600x400/1e7d36/ffffff?text=${item.name.replace(/ /g, "+")}`
-                }}
-              />
-              <div className="card-content">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{item.name}</h3>
-                  <span className="font-bold text-green-700">${item.price}</span>
-                </div>
-                <p className="text-gray-600 text-sm">{item.description}</p>
-              </div>
-            </div>
-          ))}
+      {/* Sección de Postres */}
+      <MenuSection title="Postres" items={desserts} />
+
+      {/* Sección de Bocadillos */}
+      <MenuSection title="Bocadillos" items={snacks} isLast />
+    </div>
+  )
+}
+
+// MEJORA: Componente reutilizable para evitar repetición de código
+function MenuSection({ title, items, isLast = false }) {
+  return (
+    <div className={isLast ? "" : "mb-16"}>
+      <h2 className="text-3xl font-semibold mb-8 text-green-700 border-b-2 border-green-200 pb-3">
+        {title}
+      </h2>
+      
+      {/* CORREGIDO: 4 columnas con mejor balance */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {items.map((item, index) => (
+          <MenuCard key={index} item={item} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// MEJORA: Componente separado para cada tarjeta - Tamaño balanceado para 4 columnas
+function MenuCard({ item }) {
+  return (
+    <div className="card hover:shadow-xl transition-shadow duration-300">
+      {/* CORREGIDO: Imagen con altura balanceada para 4 columnas */}
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null
+            e.target.src = `https://placehold.co/400x300/1e7d36/ffffff?text=${item.name.replace(/ /g, "+")}`
+          }}
+        />
+      </div>
+      {/* CORREGIDO: Padding balanceado */}
+      <div className="p-5">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold text-gray-800 flex-1">{item.name}</h3>
+          <span className="font-bold text-green-700 text-lg ml-2 whitespace-nowrap">${item.price}</span>
         </div>
+        <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
       </div>
     </div>
   )
