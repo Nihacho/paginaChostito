@@ -58,7 +58,7 @@ function MenuCard({ item }) {
       <div className="p-5">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-800 flex-1">{item.name}</h3>
-          <span className="font-bold text-green-700 text-lg ml-2 whitespace-nowrap">${item.price}</span>
+          <span className="font-bold text-green-700 text-lg ml-2 whitespace-nowrap">{item.price}Bs</span>
         </div>
         <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
       </div>

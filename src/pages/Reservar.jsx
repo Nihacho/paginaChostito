@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useReservas } from "../context/ReservasContext"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { db } from "../firebase/config"
+import { useAuth } from "../context/AuthContext"
 
 function Reservar() {
   const navigate = useNavigate()
-  const { addReserva } = useReservas()
+  const { user, userData } = useAuth()
 
   const [formData, setFormData] = useState({
-    nombre: "",
-    telefono: "",
     fecha: "",
     hora: "",
     personas: "2",
@@ -19,6 +19,7 @@ function Reservar() {
 
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [checkingAvailability, setCheckingAvailability] = useState(false)
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -27,7 +28,6 @@ function Reservar() {
       [id]: value,
     }))
 
-    // Limpiar error cuando el usuario comienza a escribir
     if (errors[id]) {
       setErrors((prev) => ({
         ...prev,
@@ -36,18 +36,35 @@ function Reservar() {
     }
   }
 
+  const checkAvailability = async () => {
+    if (!formData.fecha || !formData.hora) return
+
+    setCheckingAvailability(true)
+
+    try {
+      // Llamar al endpoint PHP para verificar disponibilidad
+      const response = await fetch("http://localhost/cafe-chostito-api/check-availability.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fecha: formData.fecha,
+          hora: formData.hora,
+        }),
+      })
+
+      const data = await response.json()
+      console.log("Disponibilidad:", data)
+    } catch (error) {
+      console.error("Error verificando disponibilidad:", error)
+    } finally {
+      setCheckingAvailability(false)
+    }
+  }
+
   const validateForm = () => {
     const newErrors = {}
-
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es obligatorio"
-    }
-
-    if (!formData.telefono.trim()) {
-      newErrors.telefono = "El teléfono es obligatorio"
-    } else if (!/^\d{8}$/.test(formData.telefono.trim())) {
-      newErrors.telefono = "Ingrese un número de teléfono de 8 cifras"
-    }
 
     if (!formData.fecha) {
       newErrors.fecha = "La fecha es obligatoria"
@@ -69,7 +86,7 @@ function Reservar() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!validateForm()) {
@@ -78,17 +95,32 @@ function Reservar() {
 
     setIsSubmitting(true)
 
-    // Simular un tiempo de procesamiento
-    setTimeout(() => {
-      const nuevaReserva = {
-        ...formData,
+    try {
+      // Crear reserva en Firestore
+      const reservaData = {
+        userId: user.uid,
+        nombre: userData?.nombre || user.displayName || "Usuario",
+        email: user.email,
+        telefono: userData?.telefono || "",
+        fecha: formData.fecha,
+        hora: formData.hora,
+        personas: formData.personas,
+        comentarios: formData.comentarios,
         estado: "confirmada",
+        createdAt: serverTimestamp(),
       }
 
-      addReserva(nuevaReserva)
-      navigate("/confirmacion-reserva")
+      const docRef = await addDoc(collection(db, "reservas"), reservaData)
+      console.log("Reserva creada con ID:", docRef.id)
+
+      // Redirigir a confirmación
+      navigate("/confirmacion-reserva", { state: { reservaId: docRef.id } })
+    } catch (error) {
+      console.error("Error al crear reserva:", error)
+      alert("Error al crear la reserva. Intenta de nuevo.")
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
 
   // Generar opciones de horas disponibles (9:00 AM - 9:00 PM)
@@ -104,7 +136,6 @@ function Reservar() {
   const today = new Date().toISOString().split("T")[0]
 
   return (
-    
     <div className="container py-12">
       <div className="text-center mb-12">
         <br />
@@ -115,40 +146,23 @@ function Reservar() {
       </div>
 
       <div className="max-w-2xl mx-auto">
+        {/* Info del usuario */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-8 border border-green-200">
+          <div className="flex items-center">
+            <div className="h-12 w-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
+              <span className="text-white font-bold text-lg">
+                {userData?.nombre?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">{userData?.nombre || "Usuario"}</p>
+              <p className="text-sm text-gray-600">{user.email}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="nombre" className="form-label">
-                  Nombre completo <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="nombre"
-                  className={`form-input ${errors.nombre ? "border-red-500" : ""}`}
-                  placeholder="Tu nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                />
-                {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="telefono" className="form-label">
-                  Teléfono <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="telefono"
-                  className={`form-input ${errors.telefono ? "border-red-500" : ""}`}
-                  placeholder="12345678"
-                  value={formData.telefono}
-                  onChange={handleChange}
-                />
-                {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="fecha" className="form-label">
@@ -160,7 +174,10 @@ function Reservar() {
                   className={`form-input ${errors.fecha ? "border-red-500" : ""}`}
                   min={today}
                   value={formData.fecha}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e)
+                    checkAvailability()
+                  }}
                 />
                 {errors.fecha && <p className="text-red-500 text-sm mt-1">{errors.fecha}</p>}
               </div>
@@ -173,7 +190,10 @@ function Reservar() {
                   id="hora"
                   className={`form-input ${errors.hora ? "border-red-500" : ""}`}
                   value={formData.hora}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e)
+                    checkAvailability()
+                  }}
                 >
                   <option value="">Selecciona una hora</option>
                   {horasDisponibles.map((hora) => (
@@ -183,6 +203,31 @@ function Reservar() {
                   ))}
                 </select>
                 {errors.hora && <p className="text-red-500 text-sm mt-1">{errors.hora}</p>}
+                {checkingAvailability && (
+                  <p className="text-blue-500 text-sm mt-1 flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Verificando disponibilidad...
+                  </p>
+                )}
               </div>
             </div>
 
