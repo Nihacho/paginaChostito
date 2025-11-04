@@ -25,7 +25,7 @@ function Merchandising() {
               <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
               <p className="text-gray-600 mb-4">{item.description}</p>
               <div className="flex justify-between items-center">
-                <span className="text-green-700 font-bold">${item.price}</span>
+                <span className="text-green-700 font-bold">{item.price} BS</span>
                 <button className="btn">Ver detalles</button>
               </div>
             </div>
