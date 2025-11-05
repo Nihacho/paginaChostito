@@ -8,7 +8,7 @@ import { logActivity, LOG_ACTIONS } from "../utils/logger"
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, getUserData } = useAuth()
   
   const [formData, setFormData] = useState({
     email: "",
@@ -67,7 +67,18 @@ function Login() {
     const result = await login(formData.email, formData.password)
 
     if (result.success) {
-      navigate(from, { replace: true })
+      // Obtener datos del usuario para comprobar rol
+      try {
+        const data = await getUserData(result.user.uid)
+        if (data?.rol === "admin") {
+          navigate("/admin", { replace: true })
+        } else {
+          navigate(from, { replace: true })
+        }
+      } catch (err) {
+        // Si falla la obtención de datos, navegar a la ruta original
+        navigate(from, { replace: true })
+      }
     } else {
       // Mensajes de error más amigables
       let errorMessage = "Error al iniciar sesión"

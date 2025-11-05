@@ -2,12 +2,17 @@
 
 import logo from "../assets/Chostito.png"
 import { useState, useEffect } from "react"
+import { useAuth } from "../context/AuthContext"
+import { useNavigate } from "react-router-dom"
 import { Link, useLocation } from "react-router-dom"
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, userData, logout } = useAuth()
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,7 +50,7 @@ function Navbar() {
           <span className="logo-text hidden sm:block">Coffe Chostito</span>
         </Link>
 
-        {/* Desktop Navigation */}
+  {/* Desktop Navigation */}
         <div className="navbar-links">
           <Link to="/" className={location.pathname === "/" ? "text-green-200" : ""}>
             Home
@@ -62,6 +67,56 @@ function Navbar() {
           <Link to="/reservar" className={location.pathname === "/reservar" ? "text-green-200" : ""}>
             Reservar
           </Link>
+        </div>
+
+        {/* User area */}
+        <div className="ml-4 relative">
+          {user ? (
+            <div className="relative inline-block text-left">
+              <button
+                onClick={() => setUserMenuOpen((s) => !s)}
+                className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-green-600 transition-colors text-white"
+              >
+                <span className="text-sm font-medium">{userData?.nombre || user.displayName || user.email}</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {userMenuOpen && (
+                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1">
+                    <Link
+                      to={userData?.rol === "admin" ? "/admin" : "/mis-reservas"}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Mi cuenta
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        await logout()
+                        setUserMenuOpen(false)
+                        navigate("/")
+                      }}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-x-2">
+              <Link to="/login" className="text-white hover:underline">
+                Iniciar sesión
+              </Link>
+              <Link to="/register" className="ml-2 text-white hover:underline">
+                Registrarse
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Navigation Button */}
