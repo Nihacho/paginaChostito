@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore"
 import { db } from "../firebase/config"
 import { useAuth } from "../context/AuthContext"
 
@@ -19,7 +19,11 @@ function Reservar() {
 
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [availabilityInfo, setAvailabilityInfo] = useState(null)
   const [checkingAvailability, setCheckingAvailability] = useState(false)
+
+  const CAPACIDAD_MAXIMA = 30
+  const MESAS_MAXIMAS = 10
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -36,32 +40,83 @@ function Reservar() {
     }
   }
 
+  // Verificar disponibilidad en Firestore
   const checkAvailability = async () => {
-    if (!formData.fecha || !formData.hora) return
+    if (!formData.fecha || !formData.hora) {
+      setAvailabilityInfo(null)
+      return
+    }
 
     setCheckingAvailability(true)
 
     try {
-      // Llamar al endpoint PHP para verificar disponibilidad
-      const response = await fetch("http://localhost/cafe-chostito-api/check-availability.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fecha: formData.fecha,
-          hora: formData.hora,
-        }),
+      // Consultar reservas en la misma fecha y hora
+      const q = query(
+        collection(db, "reservas"),
+        where("fecha", "==", formData.fecha),
+        where("hora", "==", formData.hora),
+        where("estado", "==", "confirmada")
+      )
+
+      const snapshot = await getDocs(q)
+      const reservasExistentes = snapshot.docs.map(doc => doc.data())
+
+      // Calcular ocupación
+      const numReservas = reservasExistentes.length
+      const personasReservadas = reservasExistentes.reduce((total, r) => {
+        const personas = parseInt(r.personas) || 0
+        return total + personas
+      }, 0)
+
+      const mesasDisponibles = MESAS_MAXIMAS - numReservas
+      const espaciosDisponibles = CAPACIDAD_MAXIMA - personasReservadas
+      const disponible = mesasDisponibles > 0 && espaciosDisponibles > 0
+
+      // Verificar si es hora pico
+      const horaInt = parseInt(formData.hora.split(':')[0])
+      const esHoraPico = (horaInt >= 12 && horaInt <= 14) || (horaInt >= 19 && horaInt <= 21)
+
+      let mensaje = ''
+      let tipo = 'success'
+
+      if (!disponible) {
+        mensaje = '⚠️ Lo sentimos, no hay disponibilidad para esta fecha y hora.'
+        tipo = 'error'
+      } else if (mesasDisponibles <= 2) {
+        mensaje = `⚡ ¡Solo ${mesasDisponibles} mesa(s) disponible(s)! Reserva ahora.`
+        tipo = 'warning'
+      } else if (esHoraPico) {
+        mensaje = '🔥 Hora pico - Alta demanda. ¡Reserva pronto!'
+        tipo = 'warning'
+      } else {
+        mensaje = `✅ Disponibilidad confirmada - ${mesasDisponibles} mesas libres`
+        tipo = 'success'
+      }
+
+      setAvailabilityInfo({
+        disponible,
+        mesasDisponibles,
+        espaciosDisponibles,
+        mensaje,
+        tipo,
+        esHoraPico
       })
 
-      const data = await response.json()
-      console.log("Disponibilidad:", data)
     } catch (error) {
       console.error("Error verificando disponibilidad:", error)
     } finally {
       setCheckingAvailability(false)
     }
   }
+
+  // Verificar disponibilidad cuando cambien fecha u hora
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkAvailability()
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [formData.fecha, formData.hora])
 
   const validateForm = () => {
     const newErrors = {}
@@ -82,6 +137,11 @@ function Reservar() {
       newErrors.hora = "La hora es obligatoria"
     }
 
+    // Verificar disponibilidad
+    if (availabilityInfo && !availabilityInfo.disponible) {
+      newErrors.hora = "No hay disponibilidad para esta fecha y hora"
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -96,7 +156,6 @@ function Reservar() {
     setIsSubmitting(true)
 
     try {
-      // Crear reserva en Firestore
       const reservaData = {
         userId: user.uid,
         nombre: userData?.nombre || user.displayName || "Usuario",
@@ -111,9 +170,8 @@ function Reservar() {
       }
 
       const docRef = await addDoc(collection(db, "reservas"), reservaData)
-      console.log("Reserva creada con ID:", docRef.id)
+      console.log("✅ Reserva creada con ID:", docRef.id)
 
-      // Redirigir a confirmación
       navigate("/confirmacion-reserva", { state: { reservaId: docRef.id } })
     } catch (error) {
       console.error("Error al crear reserva:", error)
@@ -123,7 +181,6 @@ function Reservar() {
     }
   }
 
-  // Generar opciones de horas disponibles (9:00 AM - 9:00 PM)
   const horasDisponibles = []
   for (let i = 9; i <= 21; i++) {
     horasDisponibles.push(`${i}:00`)
@@ -132,7 +189,6 @@ function Reservar() {
     }
   }
 
-  // Obtener la fecha mínima (hoy)
   const today = new Date().toISOString().split("T")[0]
 
   return (
@@ -174,10 +230,7 @@ function Reservar() {
                   className={`form-input ${errors.fecha ? "border-red-500" : ""}`}
                   min={today}
                   value={formData.fecha}
-                  onChange={(e) => {
-                    handleChange(e)
-                    checkAvailability()
-                  }}
+                  onChange={handleChange}
                 />
                 {errors.fecha && <p className="text-red-500 text-sm mt-1">{errors.fecha}</p>}
               </div>
@@ -190,10 +243,7 @@ function Reservar() {
                   id="hora"
                   className={`form-input ${errors.hora ? "border-red-500" : ""}`}
                   value={formData.hora}
-                  onChange={(e) => {
-                    handleChange(e)
-                    checkAvailability()
-                  }}
+                  onChange={handleChange}
                 >
                   <option value="">Selecciona una hora</option>
                   {horasDisponibles.map((hora) => (
@@ -203,30 +253,27 @@ function Reservar() {
                   ))}
                 </select>
                 {errors.hora && <p className="text-red-500 text-sm mt-1">{errors.hora}</p>}
+                
+                {/* Indicador de verificación */}
                 {checkingAvailability && (
-                  <p className="text-blue-500 text-sm mt-1 flex items-center">
-                    <svg
-                      className="animate-spin h-4 w-4 mr-2"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
+                  <div className="mt-2 flex items-center text-blue-600 text-sm">
+                    <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Verificando disponibilidad...
-                  </p>
+                  </div>
+                )}
+
+                {/* Mensaje de disponibilidad */}
+                {availabilityInfo && !checkingAvailability && (
+                  <div className={`mt-2 p-3 rounded-lg text-sm font-medium ${
+                    availabilityInfo.tipo === 'success' ? 'bg-green-50 text-green-700 border border-green-200' :
+                    availabilityInfo.tipo === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                    'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    {availabilityInfo.mensaje}
+                  </div>
                 )}
               </div>
             </div>
@@ -260,7 +307,11 @@ function Reservar() {
             </div>
 
             <div className="text-center">
-              <button type="submit" className="btn w-full md:w-auto px-8" disabled={isSubmitting}>
+              <button 
+                type="submit" 
+                className="btn w-full md:w-auto px-8" 
+                disabled={isSubmitting || (availabilityInfo && !availabilityInfo.disponible)}
+              >
                 {isSubmitting ? "Procesando..." : "Confirmar Reserva"}
               </button>
             </div>
