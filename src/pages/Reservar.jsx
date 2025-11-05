@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore"
 import { db } from "../firebase/config"
 import { useAuth } from "../context/AuthContext"
+import { logActivity, LOG_ACTIONS } from "../utils/logger"
 
 function Reservar() {
   const navigate = useNavigate()
