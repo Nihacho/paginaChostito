@@ -3,6 +3,10 @@ function Menu() {
     <div className="container py-12">
       {/* CORREGIDO: Agregado padding top y mejor espaciado */}
       <div className="text-center mb-12">
+        <br />
+        <br />
+        <br />
+        <br />
         <h1 className="section-title">Nuestro Menú</h1>
         <div className="section-divider"></div>
         <p className="section-subtitle">Descubre nuestra selección de cafés, postres y bocadillos</p>

@@ -1,7 +1,12 @@
 function Delivery() {
   return (
     <div className="container py-8">
+      <br />
+      <br />
+      <br />
+      <br />
       <h1 className="section-title">Servicio de Delivery</h1>
+      <div className="section-divider"></div>
 
       <p className="text-center text-lg mb-10 max-w-2xl mx-auto">
         Disfruta de nuestros productos favoritos sin salir de casa. Trabajamos con las mejores plataformas de delivery

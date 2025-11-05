@@ -196,7 +196,7 @@ function Reservar() {
     <div className="container py-12">
       <div className="text-center mb-12">
         <br />
-        <br />
+        <br /> <br /><br />
         <h1 className="section-title">Reserva tu Mesa</h1>
         <div className="section-divider"></div>
         <p className="section-subtitle">Completa el formulario para reservar tu mesa en Café Chostito</p>

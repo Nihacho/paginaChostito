@@ -1,7 +1,9 @@
 function Merchandising() {
   return (
     <div className="container py-8">
+      <br /><br /><br /><br />
       <h1 className="section-title">Merchandising</h1>
+      <div className="section-divider"></div>
 
       <p className="text-center text-lg mb-10 max-w-2xl mx-auto">
         Lleva contigo un pedacito de Café Chostito. Nuestra colección de merchandising está diseñada para los verdaderos
