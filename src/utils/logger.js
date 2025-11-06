@@ -4,7 +4,8 @@
  * Café Chostito - Sistema de Auditoría
  */
 
-const PHP_API_URL = "http://localhost/cafe-chostito-api/activity-logger.php"
+// Endpoint del logger PHP (asegúrate que Apache sirve esta ruta)
+const PHP_API_URL = "http://localhost/paginaChostito/api/activity-logger.php"
 
 /**
  * Envía un log de actividad al servidor PHP
@@ -25,11 +26,21 @@ export const logActivity = async (action, user, details = "") => {
         details: details,
       }),
     })
+    let data = null
+    try {
+      data = await response.json()
+    } catch (err) {
+      console.warn("⚠️ Logger: respuesta no JSON desde PHP", err.message)
+    }
 
-    const data = await response.json()
-    
-    if (data.success) {
-      console.log(`📝 Log registrado: ${action}`)
+    if (response.ok) {
+      if (data?.success) {
+        console.log(`📝 Log registrado: ${action}`)
+      } else {
+        console.warn("⚠️ Logger: endpoint respondió OK pero success !== true", data)
+      }
+    } else {
+      console.warn("⚠️ Logger: error desde endpoint", response.status, data)
     }
   } catch (error) {
     // Silencioso - no queremos que falle la app si el log falla

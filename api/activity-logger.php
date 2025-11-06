@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Solo POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+    echo json_encode(['success' => false, 'message' => 'Método no permitido. Use POST']);
     exit();
 }
 
@@ -26,10 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
+// Log de debug (temporal)
+error_log("📥 Logger recibió: " . print_r($data, true));
+
 // Validar datos
 if (!isset($data['action']) || !isset($data['user'])) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Faltan parámetros']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Faltan parámetros requeridos',
+        'received' => $data
+    ]);
     exit();
 }
 
@@ -49,44 +56,60 @@ $logLine = sprintf(
     $user,
     $action,
     $details,
-    $userAgent
+    substr($userAgent, 0, 100) // Truncar user agent
 );
 
-// Guardar en archivo
-$logFile = __DIR__ . '/logs/activity_' . date('Y-m') . '.log';
-$logDir = dirname($logFile);
+// Definir ruta de logs
+$logDir = __DIR__ . '/logs';
+$logFile = $logDir . '/activity_' . date('Y-m') . '.log';
 
 // Crear directorio si no existe
 if (!is_dir($logDir)) {
-    mkdir($logDir, 0755, true);
+    $created = mkdir($logDir, 0777, true);
+    if (!$created) {
+        error_log("❌ No se pudo crear directorio: $logDir");
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al crear directorio de logs',
+            'path' => $logDir
+        ]);
+        exit();
+    }
+    chmod($logDir, 0777); // Dar permisos completos
 }
 
 // Escribir log
 $success = file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
 
-// También guardar logs críticos en un archivo especial
-if (in_array($action, ['RESERVA_CREADA', 'RESERVA_CANCELADA', 'LOGIN', 'REGISTER'])) {
-    $criticalLog = __DIR__ . '/logs/critical_' . date('Y-m') . '.log';
-    file_put_contents($criticalLog, $logLine, FILE_APPEND | LOCK_EX);
-}
-
-// Respuesta
-if ($success !== false) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Log registrado correctamente',
-        'timestamp' => $timestamp,
-        'action' => $action
-    ], JSON_PRETTY_PRINT);
-} else {
+if ($success === false) {
+    error_log("❌ Error escribiendo en: $logFile");
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Error al guardar el log'
+        'message' => 'Error al escribir log',
+        'file' => $logFile
     ]);
+    exit();
 }
 
-// BONUS: Función para limpiar logs antiguos (más de 6 meses)
+// También guardar logs críticos
+if (in_array($action, ['RESERVA_CREADA', 'RESERVA_CANCELADA', 'LOGIN', 'REGISTER'])) {
+    $criticalLog = $logDir . '/critical_' . date('Y-m') . '.log';
+    file_put_contents($criticalLog, $logLine, FILE_APPEND | LOCK_EX);
+}
+
+// Respuesta exitosa
+echo json_encode([
+    'success' => true,
+    'message' => 'Log registrado correctamente',
+    'timestamp' => $timestamp,
+    'action' => $action,
+    'file' => basename($logFile),
+    'bytes_written' => $success
+], JSON_PRETTY_PRINT);
+
+// Función para limpiar logs antiguos
 function cleanOldLogs() {
     $logDir = __DIR__ . '/logs/';
     if (!is_dir($logDir)) return;
@@ -101,7 +124,8 @@ function cleanOldLogs() {
     }
 }
 
-// Ejecutar limpieza 1 de cada 100 requests (1%)
+// Ejecutar limpieza ocasionalmente
 if (rand(1, 100) === 1) {
     cleanOldLogs();
 }
+?>

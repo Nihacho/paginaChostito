@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext"
 import { logActivity, LOG_ACTIONS } from "../utils/logger"
 
 function Reservar() {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const { user, userData } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -173,7 +173,7 @@ function Reservar() {
       const docRef = await addDoc(collection(db, "reservas"), reservaData)
       console.log("✅ Reserva creada con ID:", docRef.id)
 
-      navigate("/confirmacion-reserva", { state: { reservaId: docRef.id } })
+      // navigate("/confirmacion-reserva", { state: { reservaId: docRef.id } })
     } catch (error) {
       console.error("Error al crear reserva:", error)
       alert("Error al crear la reserva. Intenta de nuevo.")
@@ -195,6 +195,7 @@ function Reservar() {
   return (
     <div className="container py-12">
       <div className="text-center mb-12">
+        <br />
         <br />
         <br /> <br /><br />
         <h1 className="section-title">Reserva tu Mesa</h1>
