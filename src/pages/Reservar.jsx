@@ -6,9 +6,10 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs } from "fire
 import { db } from "../firebase/config"
 import { useAuth } from "../context/AuthContext"
 import { logActivity, LOG_ACTIONS } from "../utils/logger"
+import toast, { Toaster } from "react-hot-toast"
 
 function Reservar() {
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
   const { user, userData } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -151,10 +152,19 @@ function Reservar() {
     e.preventDefault()
 
     if (!validateForm()) {
+      toast.error("Por favor completa todos los campos requeridos", {
+        duration: 3000,
+        position: "top-center",
+      })
       return
     }
 
     setIsSubmitting(true)
+
+    // Mostrar toast de carga
+    const loadingToast = toast.loading("Procesando tu reserva...", {
+      position: "top-center",
+    })
 
     try {
       const reservaData = {
@@ -173,10 +183,50 @@ function Reservar() {
       const docRef = await addDoc(collection(db, "reservas"), reservaData)
       console.log("✅ Reserva creada con ID:", docRef.id)
 
-      // navigate("/confirmacion-reserva", { state: { reservaId: docRef.id } })
+      // Registrar actividad si existe la función
+      try {
+        await logActivity(LOG_ACTIONS.RESERVA_CREADA, user.uid, {
+          reservaId: docRef.id,
+          fecha: formData.fecha,
+          hora: formData.hora,
+        })
+      } catch (logError) {
+        console.log("Error al registrar actividad:", logError)
+      }
+
+      // Cerrar toast de carga y mostrar éxito
+      toast.success(
+        `¡Reserva confirmada! ${formData.fecha} a las ${formData.hora}`,
+        {
+          id: loadingToast,
+          duration: 4000,
+          position: "top-center",
+          icon: "🎉",
+        }
+      )
+
+      // Esperar 1.5 segundos antes de redirigir
+      setTimeout(() => {
+        navigate("/mis-reservas")
+      }, 1500)
+
     } catch (error) {
       console.error("Error al crear reserva:", error)
-      alert("Error al crear la reserva. Intenta de nuevo.")
+      
+      // Determinar el mensaje de error
+      let errorMessage = "Error al crear la reserva. Por favor intenta de nuevo."
+      
+      if (error.code === "permission-denied") {
+        errorMessage = "No tienes permisos para crear reservas. Verifica tu sesión."
+      } else if (error.code === "unavailable") {
+        errorMessage = "Servicio no disponible. Verifica tu conexión a internet."
+      }
+
+      toast.error(errorMessage, {
+        id: loadingToast,
+        duration: 4000,
+        position: "top-center",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -194,6 +244,9 @@ function Reservar() {
 
   return (
     <div className="container py-12">
+      {/* Componente de notificaciones */}
+      <Toaster />
+      
       <div className="text-center mb-12">
         <br />
         <br />

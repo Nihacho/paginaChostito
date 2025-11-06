@@ -67,6 +67,9 @@ function Navbar() {
           <Link to="/reservar" className={location.pathname === "/reservar" ? "text-green-200" : ""}>
             Reservar
           </Link>
+          <Link to="/mis-reservas" className={location.pathname === "/mis-reservas" ? "text-green-200" : ""}>
+            Mis Reservas
+          </Link>
         </div>
 
         {/* User area */}

@@ -1,0 +1,38 @@
+# .htaccess para /paginaChostito/api/
+# Asegura que PHP funcione correctamente y CORS esté habilitado
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Permitir acceso a archivos PHP
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L]
+</IfModule>
+
+# CORS Headers
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    Header set Access-Control-Max-Age "3600"
+</IfModule>
+
+# PHP Settings
+<IfModule mod_php7.c>
+    php_flag display_errors On
+    php_value error_reporting E_ALL
+    php_value max_execution_time 300
+    php_value memory_limit 256M
+</IfModule>
+
+# Seguridad: No listar directorios
+Options -Indexes
+
+# Permitir acceso a archivos .log solo desde localhost (opcional)
+<FilesMatch "\.log$">
+    Order Allow,Deny
+    Deny from all
+    Allow from 127.0.0.1
+    Allow from ::1
+</FilesMatch>
