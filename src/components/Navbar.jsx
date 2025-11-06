@@ -29,6 +29,29 @@ function Navbar() {
     }
   }, [])
 
+  // Cerrar menú de usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuOpen && !event.target.closest('.user-menu-container')) {
+        setUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [userMenuOpen])
+
+  // Obtener inicial del usuario
+  const getUserInitial = () => {
+    if (userData?.nombre) {
+      return userData.nombre.charAt(0).toUpperCase()
+    }
+    if (user?.displayName) {
+      return user.displayName.charAt(0).toUpperCase()
+    }
+    return user?.email?.charAt(0).toUpperCase() || 'U'
+  }
+
   return (
     <nav
       className={`navbar ${scrolled ? "bg-green-800" : "bg-green-700"}`}
@@ -50,7 +73,7 @@ function Navbar() {
           <span className="logo-text hidden sm:block">Coffe Chostito</span>
         </Link>
 
-  {/* Desktop Navigation */}
+        {/* Desktop Navigation */}
         <div className="navbar-links">
           <Link to="/" className={location.pathname === "/" ? "text-green-200" : ""}>
             Home
@@ -72,37 +95,38 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* User area */}
-        <div className="ml-4 relative">
+        {/* User area - SIMPLIFICADO */}
+        <div className="ml-4 relative user-menu-container">
           {user ? (
-            <div className="relative inline-block text-left">
+            <div className="relative">
+              {/* Avatar circular con inicial */}
               <button
-                onClick={() => setUserMenuOpen((s) => !s)}
-                className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-green-600 transition-colors text-white"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-10 h-10 rounded-full bg-white text-green-700 flex items-center justify-center font-bold text-lg hover:bg-green-50 transition-all duration-200 shadow-md hover:shadow-lg"
+                title={user.email}
               >
-                <span className="text-sm font-medium">{userData?.nombre || user.displayName || user.email}</span>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                {getUserInitial()}
               </button>
 
+              {/* Dropdown menu simple */}
               {userMenuOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden">
+                  {/* Correo del usuario */}
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <p className="text-sm text-gray-900 truncate font-medium">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  {/* Botón cerrar sesión */}
                   <div className="py-1">
-                    <Link
-                      to={userData?.rol === "admin" ? "/admin" : "/mis-reservas"}
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Mi cuenta
-                    </Link>
                     <button
                       onClick={async () => {
                         await logout()
                         setUserMenuOpen(false)
                         navigate("/")
                       }}
-                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
                       Cerrar sesión
                     </button>
@@ -111,11 +135,17 @@ function Navbar() {
               )}
             </div>
           ) : (
-            <div className="space-x-2">
-              <Link to="/login" className="text-white hover:underline">
+            <div className="flex items-center space-x-2">
+              <Link 
+                to="/login" 
+                className="px-4 py-2 text-white hover:text-green-200 transition-colors font-medium"
+              >
                 Iniciar sesión
               </Link>
-              <Link to="/register" className="ml-2 text-white hover:underline">
+              <Link 
+                to="/register" 
+                className="px-4 py-2 bg-white text-green-700 rounded-full hover:bg-green-50 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+              >
                 Registrarse
               </Link>
             </div>
@@ -180,6 +210,33 @@ function Navbar() {
           >
             Reservar
           </Link>
+          <Link
+            to="/mis-reservas"
+            onClick={() => setIsMenuOpen(false)}
+            className={location.pathname === "/mis-reservas" ? "text-green-200" : ""}
+          >
+            Mis Reservas
+          </Link>
+
+          {/* Mobile user section */}
+          {user && (
+            <>
+              <div className="border-t border-green-600 my-2"></div>
+              <div className="px-4 py-2 text-green-100 text-sm">
+                {user.email}
+              </div>
+              <button
+                onClick={async () => {
+                  await logout()
+                  setIsMenuOpen(false)
+                  navigate("/")
+                }}
+                className="w-full text-left text-red-300 hover:text-red-200"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>
