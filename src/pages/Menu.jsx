@@ -71,12 +71,12 @@ function MenuCard({ item }) {
 }
 
 const coffees = [
-  {
-    name: "Espresso",
-    description: "Café concentrado con un sabor intenso y aroma excepcional",
-    price: "2.50",
-    image: "https://images.unsplash.com/photo-1610889556528-9a770e32642f?q=80&w=600",
-  },
+  // {
+  //   name: "Espresso",
+  //   description: "Café concentrado con un sabor intenso y aroma excepcional",
+  //   price: "2.50",
+  //   image: "https://images.unsplash.com/photo-1610889556528-9a770e32642f?q=80&w=600",
+  // },
   {
     name: "Cappuccino",
     description: "Espresso con leche vaporizada y espuma de leche en partes iguales",
@@ -95,12 +95,12 @@ const coffees = [
     price: "4.50",
     image: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?q=80&w=600",
   },
-  {
-    name: "Flat White",
-    description: "Espresso con microespuma de leche para un sabor más intenso",
-    price: "4.25",
-    image: "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?q=80&w=600",
-  },
+  // {
+  //   name: "Flat White",
+  //   description: "Espresso con microespuma de leche para un sabor más intenso",
+  //   price: "4.25",
+  //   image: "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?q=80&w=600",
+  // },
   {
     name: "Cold Brew",
     description: "Café preparado en frío durante 12 horas para un sabor suave y refrescante",
@@ -110,12 +110,12 @@ const coffees = [
 ]
 
 const desserts = [
-  {
-    name: "Cheesecake",
-    description: "Tarta de queso cremosa con base de galleta y cobertura de frutos rojos",
-    price: "5.50",
-    image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?q=80&w=600",
-  },
+  // {
+  //   name: "Cheesecake",
+  //   description: "Tarta de queso cremosa con base de galleta y cobertura de frutos rojos",
+  //   price: "5.50",
+  //   image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?q=80&w=600",
+  // },
   {
     name: "Brownie",
     description: "Brownie de chocolate con nueces y servido con helado de vainilla",
@@ -128,12 +128,12 @@ const desserts = [
     price: "5.25",
     image: "https://images.unsplash.com/photo-1535920527002-b35e96722eb9?q=80&w=600",
   },
-  {
-    name: "Muffin de Arándanos",
-    description: "Muffin esponjoso con arándanos frescos",
-    price: "3.50",
-    image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?q=80&w=600",
-  },
+  // {
+  //   name: "Muffin de Arándanos",
+  //   description: "Muffin esponjoso con arándanos frescos",
+  //   price: "3.50",
+  //   image: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?q=80&w=600",
+  // },
 ]
 
 const snacks = [

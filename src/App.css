@@ -1,3 +1,21 @@
+/* Animación para el dropdown del usuario */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+
+
 .app {
   display: flex;
   flex-direction: column;
@@ -24,6 +42,54 @@
 .animate-fade-in {
   animation: fadeIn 0.8s ease forwards;
 }
+
+/* Login specific styles */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, #0f3b16 0%, #144d22 50%, #0a3b26 100%);
+}
+.login-container {
+  width: 100%;
+  max-width: 780px;
+}
+.login-card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  overflow: hidden;
+  border: 1px solid #e8e8e8;
+}
+.login-header {
+  background: linear-gradient(90deg,#16a34a,#059669);
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+}
+.login-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.login-title { font-size: 28px; color: #fff; margin-bottom: 6px; font-weight:700; }
+.login-subtitle { color: rgba(255,255,255,0.9); }
+.login-body { padding: 28px 36px; }
+.form-group { margin-bottom: 16px; }
+.form-input { width:100%; padding:12px 14px; border:1px solid #e6e6e6; border-radius:12px; font-size:15px; }
+.form-input.error { border-color:#f87171; background:#fff7f7; }
+.login-submit { width:100%; padding:14px 18px; border-radius:12px; font-weight:700; }
+.login-submit.btn { background: linear-gradient(90deg,#16a34a,#059669); color:white; border:none; box-shadow: 0 8px 20px rgba(37,99,46,0.25); }
+.login-divider { text-align:center; margin:20px 0; position:relative; }
+.login-divider span { background:white; padding:8px 16px; display:inline-block; border-radius:999px; border:1px solid #eee; }
 
 /* Estilos para las secciones */
 .section {

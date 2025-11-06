@@ -241,7 +241,7 @@ function Home() {
                   <h3 className="product-title">{product.name}</h3>
                   <p className="product-description">{product.description}</p>
                   <div className="product-action">
-                    <span className="product-price">${product.price}</span>
+                    <span className="product-price">{product.price} Bs</span>
                     <Link to="/menu" className="product-link">
                       Ver más
                     </Link>
