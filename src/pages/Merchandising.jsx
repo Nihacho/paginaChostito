@@ -116,12 +116,12 @@ const merchandiseItems = [
     price: "12.50",
     image: "https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600",
   },
-  {
-    name: "Set de Posavasos",
-    description: "Set de 4 posavasos con diseños inspirados en nuestros cafés más populares",
-    price: "9.99",
-    image: "https://images.unsplash.com/photo-1614632537197-38a17061c2bd?q=80&w=600",
-  },
+  // {
+  //   name: "Set de Posavasos",
+  //   description: "Set de 4 posavasos con diseños inspirados en nuestros cafés más populares",
+  //   price: "9.99",
+  //   image: "https://images.unsplash.com/photo-1614632537197-38a17061c2bd?q=80&w=600",
+  // },
 ]
 
 export default Merchandising
