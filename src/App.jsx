@@ -17,6 +17,7 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import MisReservas from "./pages/MisReservas"
 import Admin from "./pages/Admin"
+import AdminTrue from "./pages/AdminTrue"
 
 import "./App.css"
 
@@ -67,8 +68,16 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requireAdmin={true}>
+                <ProtectedRoute allowedRoles={["empleado", "admin"]}>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin-true"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminTrue />
                 </ProtectedRoute>
               }
             />

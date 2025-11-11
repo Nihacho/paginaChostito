@@ -86,6 +86,8 @@ function Login() {
           
           setTimeout(() => {
             if (data?.rol === "admin") {
+              navigate("/admin-true", { replace: true })
+            } else if (data?.rol === "empleado") {
               navigate("/admin", { replace: true })
             } else {
               navigate(from, { replace: true })
