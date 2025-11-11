@@ -208,6 +208,8 @@ function Home() {
         </div>
       </section>
 
+   
+
       {/* Featured Products */}
       <section
         id="products-section"
@@ -224,6 +226,9 @@ function Home() {
             <div className="section-divider"></div>
             <p className="section-subtitle">Descubre nuestros productos más populares y déjate sorprender</p>
           </div>
+
+
+          //hola hijos de la maraca
 
           <div className="product-grid">
             {featuredProducts.map((product, index) => (
