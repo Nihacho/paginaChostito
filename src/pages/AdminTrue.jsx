@@ -1,166 +1,356 @@
-import React, { useEffect, useState } from "react"
-import { useAuth } from "../context/AuthContext"
-import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, updateDoc, deleteDoc, doc } from "firebase/firestore"
-import { db } from "../firebase/config"
-import { Toaster, toast } from "react-hot-toast"
-import { Navigate } from "react-router-dom"
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase/config";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { FaUser, FaTrash, FaUsers, FaUserTie, FaUserFriends, FaPlus, FaTimes, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import "../App.css";
 
 function AdminTrue() {
-  const { user, userData, loading } = useAuth()
-  const [users, setUsers] = useState([])
-  const [loadingUsers, setLoadingUsers] = useState(true)
-  const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ email: "", name: "", password: "", rol: "empleado" })
+  const { logout } = useAuth();
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [nuevoUsuario, setNuevoUsuario] = useState({
+    nombre: "",
+    email: "",
+    telefono: "",
+    rol: "cliente",
+    estado: "Activo",
+  });
 
+  // Obtener usuarios desde Firestore
   useEffect(() => {
-    if (!user) return
-    if (userData?.rol !== "admin") return
-    const load = async () => {
-      setLoadingUsers(true)
+    const obtenerUsuarios = async () => {
       try {
-        const q = query(collection(db, "users"), orderBy("createdAt", "desc"))
-        const snap = await getDocs(q)
-        setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      } catch (err) {
-        console.error(err)
-        toast.error("No se pudieron cargar los usuarios")
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const usuariosData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          // Si no tiene estado, asignar "Activo" por defecto
+          estado: doc.data().estado || "Activo",
+        }));
+        setUsuarios(usuariosData);
+      } catch (error) {
+        console.error("Error al obtener usuarios:", error);
       } finally {
-        setLoadingUsers(false)
+        setLoading(false);
+      }
+    };
+    obtenerUsuarios();
+  }, []);
+
+  // Eliminar usuario
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Estás seguro de eliminar este usuario?")) {
+      try {
+        await deleteDoc(doc(db, "users", id));
+        setUsuarios(usuarios.filter((u) => u.id !== id));
+        alert("Usuario eliminado correctamente");
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+        alert("Error al eliminar el usuario");
       }
     }
-    load()
-  }, [user, userData])
+  };
 
-  if (loading) return <div> Cargando... </div>
-  if (!user) return <Navigate to="/login" replace />
-
-  if (userData?.rol !== "admin") {
-    return <div>Acceso denegado</div>
-  }
-
-  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-
-  const handleCreate = async (e) => {
-    e.preventDefault()
-    setCreating(true)
+  // Cambiar estado del usuario
+  const handleToggleEstado = async (id, estadoActual) => {
+    const nuevoEstado = estadoActual === "Activo" ? "Inactivo" : "Activo";
     try {
-      // Crear solo el documento en Firestore (sin crear cuenta Auth)
-      const usersCol = collection(db, "users")
-      const docRef = await addDoc(usersCol, {
-        name: form.name || null,
-        email: form.email || null,
-        rol: form.rol || "empleado",
+      const usuarioRef = doc(db, "users", id);
+      await updateDoc(usuarioRef, { estado: nuevoEstado });
+      setUsuarios(
+        usuarios.map((u) =>
+          u.id === id ? { ...u, estado: nuevoEstado } : u
+        )
+      );
+    } catch (error) {
+      console.error("Error al cambiar estado:", error);
+      alert("Error al cambiar el estado del usuario");
+    }
+  };
+
+  // Agregar nuevo usuario
+  const handleAgregarUsuario = async (e) => {
+    e.preventDefault();
+    
+    // Validaciones básicas
+    if (!nuevoUsuario.nombre || !nuevoUsuario.email || !nuevoUsuario.telefono) {
+      alert("Por favor completa todos los campos obligatorios");
+      return;
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, "users"), {
+        nombre: nuevoUsuario.nombre,
+        email: nuevoUsuario.email,
+        telefono: nuevoUsuario.telefono,
+        rol: nuevoUsuario.rol,
+        estado: nuevoUsuario.estado,
         createdAt: serverTimestamp(),
-        createdByUid: user.uid,
-        createdByEmail: user.email,
-        // campos adicionales de auditoría
-        audit: {
-          createdFrom: "admin-panel",
-        }
-      })
+      });
 
-      toast.success("Empleado registrado en Firestore correctamente")
-      // recargar lista
-      const q = query(collection(db, "users"), orderBy("createdAt", "desc"))
-      const snap = await getDocs(q)
-      setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      setForm({ email: "", name: "", password: "", rol: "empleado" })
-    } catch (err) {
-      console.error(err)
-      toast.error(err.message || "Error creando empleado")
-    } finally {
-      setCreating(false)
+      // Actualizar estado local
+      setUsuarios([...usuarios, { 
+        id: docRef.id, 
+        ...nuevoUsuario,
+        createdAt: new Date().toISOString(),
+      }]);
+      
+      // Resetear formulario y cerrar modal
+      setNuevoUsuario({
+        nombre: "",
+        email: "",
+        telefono: "",
+        rol: "cliente",
+        estado: "Activo",
+      });
+      setShowModal(false);
+      alert("Usuario agregado exitosamente");
+    } catch (error) {
+      console.error("Error al agregar usuario:", error);
+      alert("Error al agregar el usuario");
     }
+  };
+
+  // Manejar cambios en el formulario
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNuevoUsuario({ ...nuevoUsuario, [name]: value });
+  };
+
+  if (loading) {
+    return <div className="loading">Cargando datos...</div>;
   }
 
-  const handleUpdateRole = async (userId, newRole) => {
-    try {
-      await updateDoc(doc(db, "users", userId), { rol: newRole, updatedAt: serverTimestamp(), updatedBy: user.email })
-      toast.success("Rol actualizado")
-      const q = query(collection(db, "users"), orderBy("createdAt", "desc"))
-      const snap = await getDocs(q)
-      setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-    } catch (err) {
-      console.error(err)
-      toast.error("Error actualizando rol")
-    }
-  }
-
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm("¿Eliminar usuario? Esto no borra su cuenta de Auth, solo el documento.")) return
-    try {
-      await deleteDoc(doc(db, "users", userId))
-      toast.success("Usuario eliminado (solo documento Firestore)")
-      setUsers(prev => prev.filter(u => u.id !== userId))
-    } catch (err) {
-      console.error(err)
-      toast.error("Error eliminando usuario")
-    }
-  }
- 
+  // Métricas corregidas - contando por rol (case insensitive)
+  const cantidadEmpleados = usuarios.filter(
+    (u) => u.rol && u.rol.toLowerCase() === "empleado"
+  ).length;
+  
+  const cantidadClientes = usuarios.filter(
+    (u) => u.rol && u.rol.toLowerCase() === "cliente"
+  ).length;
+  
+  const cantidadAdmins = usuarios.filter(
+    (u) => u.rol && u.rol.toLowerCase() === "admin"
+  ).length;
+  
+  const totalPersonas = usuarios.length;
 
   return (
-    <div className="p-6">
-      <Toaster position="top-center" />
-      <h1 className="text-2xl font-bold mb-4">Gestión de Usuarios (Admin)</h1>
+    <div className="admin-container fadeIn">
+      <header className="admin-header pulse">
+        <br /><br /><br /><br /><br /><br />
+        <h1>Panel de Administración</h1>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="btn-confirm" 
+            onClick={() => setShowModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <FaPlus /> Agregar Usuario
+          </button>
+          <button className="logout-button" onClick={logout}>
+            Cerrar sesión
+          </button>
+        </div>
+      </header>
 
-      <section className="mb-6">
-        <form onSubmit={handleCreate} className="space-y-2 max-w-md">
-          <input name="name" value={form.name} onChange={handleChange} placeholder="Nombre" className="form-input" />
-          <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="form-input" />
-          <input name="password" value={form.password} onChange={handleChange} placeholder="Password" className="form-input" />
-          <select name="rol" value={form.rol} onChange={handleChange} className="form-input">
-            <option value="empleado">Empleado</option>
-            <option value="admin">Admin</option>
-            <option value="cliente">Cliente</option>
-          </select>
-          <button type="submit" className="login-submit btn" disabled={creating}>{creating ? "Creando..." : "Crear empleado"}</button>
-        </form>
+      {/* Indicadores superiores */}
+      <section className="admin-stats fadeIn">
+        <div className="stat-card empleados">
+          <FaUserTie className="stat-icon" />
+          <h3>Empleados</h3>
+          <p>{cantidadEmpleados}</p>
+        </div>
+        <div className="stat-card clientes">
+          <FaUserFriends className="stat-icon" />
+          <h3>Clientes</h3>
+          <p>{cantidadClientes}</p>
+        </div>
+        <div className="stat-card admins" style={{ background: '#e3f2fd' }}>
+          <FaUser className="stat-icon" style={{ color: '#1976d2' }} />
+          <h3>Admins</h3>
+          <p>{cantidadAdmins}</p>
+        </div>
+        <div className="stat-card total">
+          <FaUsers className="stat-icon" />
+          <h3>Total Personas</h3>
+          <p>{totalPersonas}</p>
+        </div>
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Usuarios registrados</h2>
-        {loadingUsers ? <div>Cargando usuarios...</div> : (
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr>
-                <th>Nombre</th><th>Email</th><th>Rol</th><th>Creado</th><th>Creado por</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                  <tr key={u.id}>
-                    <td>{u.name || "-"}</td>
-                    <td>{u.email}</td>
+      {/* Modal para agregar usuario */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Agregar Nuevo Usuario</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <form onSubmit={handleAgregarUsuario} className="user-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nombre Completo *</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={nuevoUsuario.nombre}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input"
+                    placeholder="Ej: Juan Pérez"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={nuevoUsuario.email}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input"
+                    placeholder="ejemplo@correo.com"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Teléfono *</label>
+                  <input
+                    type="tel"
+                    name="telefono"
+                    value={nuevoUsuario.telefono}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input"
+                    placeholder="69696969"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Rol *</label>
+                  <select
+                    name="rol"
+                    value={nuevoUsuario.rol}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="empleado">Empleado</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="btn-confirm">
+                  <FaPlus /> Agregar Usuario
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-cancel"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Tabla de usuarios */}
+      <main className="admin-content">
+        {usuarios.length > 0 ? (
+          <div className="table-container">
+            <table className="admin-table fadeIn">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Fecha Registro</th>
+                  <th style={{ width: '200px', textAlign: 'center' }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuarios.map((usuario) => (
+                  <tr key={usuario.id}>
+                    <td>{usuario.nombre || "Sin nombre"}</td>
+                    <td>{usuario.email || "N/A"}</td>
+                    <td>{usuario.telefono || "N/A"}</td>
                     <td>
-                      <select
-                        value={u.rol}
-                        onChange={(e) => handleUpdateRole(u.id, e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="cliente">Cliente</option>
-                        <option value="empleado">Empleado</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                      <span className={`rol-badge ${usuario.rol?.toLowerCase() || 'default'}`}>
+                        {usuario.rol || "N/A"}
+                      </span>
                     </td>
-                    <td>{u.createdAt?.toDate ? u.createdAt.toDate().toLocaleString() : u.createdAt || "-"}</td>
-                    <td>{u.createdByEmail || "-"}</td>
                     <td>
-                      <button
-                        onClick={() => handleDeleteUser(u.id)}
-                        className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-semibold"
+                      <span
+                        className={`estado ${
+                          usuario.estado === "Activo"
+                            ? "activo"
+                            : usuario.estado === "Inactivo"
+                            ? "inactivo"
+                            : "pendiente"
+                        }`}
                       >
-                        Eliminar
-                      </button>
+                        {usuario.estado || "Activo"}
+                      </span>
+                    </td>
+                    <td>
+                      {usuario.createdAt?.toDate 
+                        ? usuario.createdAt.toDate().toLocaleDateString('es-ES')
+                        : usuario.createdAt 
+                        ? new Date(usuario.createdAt).toLocaleDateString('es-ES')
+                        : "N/A"}
+                    </td>
+                    <td>
+                      <div className="acciones">
+                        <button
+                          className={usuario.estado === "Activo" ? "btn-inactive btn-small" : "btn-confirm btn-small"}
+                          onClick={() => handleToggleEstado(usuario.id, usuario.estado)}
+                          title={usuario.estado === "Activo" ? "Desactivar" : "Activar"}
+                        >
+                          {usuario.estado === "Activo" ? <FaToggleOff /> : <FaToggleOn />}
+                        </button>
+                        <button
+                          className="btn-delete btn-small"
+                          onClick={() => handleDelete(usuario.id)}
+                          title="Eliminar"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-              ))}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="no-reservas">No hay usuarios registrados en el sistema</p>
         )}
-      </section>
+      </main>
     </div>
-  )
+  );
 }
 
-export default AdminTrue
+export default AdminTrue;
