@@ -144,7 +144,7 @@ function Navbar() {
               </Link>
               <Link 
                 to="/register" 
-                className="px-4 py-2 bg-white text-green-700 rounded-full hover:bg-green-50 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+                className="px-4 py-2 text-white hover:text-green-200 transition-colors font-medium"
               >
                 Registrarse
               </Link>

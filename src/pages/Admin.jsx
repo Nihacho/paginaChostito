@@ -151,21 +151,22 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="admin-container">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="admin-header">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Panel de Administración</h1>
-              <p className="text-gray-600 mt-1">Sistema de Gestión de Reservas - Café Chostito</p>
+              <br /><br />
+              <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
+              <p className="text-green-100 mt-1">Sistema de Gestión de Reservas - Café Chostito</p>
             </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
               >
-                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -181,12 +182,12 @@ function Admin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Estadísticas - NUEVO DISEÑO */}
+        <div className="stats-grid">
+          <div className="stat-card blue">
+            <div className="flex items-center justify-between">
+              <div className="stat-icon-wrapper blue">
+                <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -195,17 +196,17 @@ function Admin() {
                   />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Reservas</p>
-                <p className="text-2xl font-bold text-gray-900">{reservas.length}</p>
+              <div className="text-right">
+                <p className="stat-label">Total Reservas</p>
+                <p className="stat-value">{reservas.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="stat-card green">
+            <div className="flex items-center justify-between">
+              <div className="stat-icon-wrapper green">
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -214,19 +215,17 @@ function Admin() {
                   />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Confirmadas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {reservas.filter((r) => r.estado === "confirmada").length}
-                </p>
+              <div className="text-right">
+                <p className="stat-label">Confirmadas</p>
+                <p className="stat-value">{reservas.filter((r) => r.estado === "confirmada").length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="stat-card yellow">
+            <div className="flex items-center justify-between">
+              <div className="stat-icon-wrapper yellow">
+                <svg className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -235,19 +234,19 @@ function Admin() {
                   />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Hoy</p>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="text-right">
+                <p className="stat-label">Hoy</p>
+                <p className="stat-value">
                   {reservas.filter((r) => r.fecha === new Date().toISOString().split("T")[0]).length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="stat-card purple">
+            <div className="flex items-center justify-between">
+              <div className="stat-icon-wrapper purple">
+                <svg className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -256,9 +255,9 @@ function Admin() {
                   />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Personas</p>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="text-right">
+                <p className="stat-label">Total Personas</p>
+                <p className="stat-value">
                   {reservas.reduce((total, r) => total + Number.parseInt(r.personas || 0), 0)}
                 </p>
               </div>
@@ -266,15 +265,12 @@ function Admin() {
           </div>
         </div>
 
-        {/* Filtros y Búsqueda */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Filtros y Búsqueda</h2>
-            <button
-              onClick={exportarDatos}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-            >
-              <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Filtros y Búsqueda - NUEVO DISEÑO */}
+        <div className="filter-panel">
+          <div className="filter-header">
+            <h2 className="filter-title">Filtros y Búsqueda</h2>
+            <button onClick={exportarDatos} className="btn-export">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -286,61 +282,92 @@ function Admin() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="filters-grid">
             <div>
-              <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar
+              <label htmlFor="searchTerm" className="filter-label">
+                🔎 Buscar
               </label>
-              <input
-                type="text"
-                id="searchTerm"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Nombre, email, teléfono..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="filter-input-wrapper">
+                <svg className="h-5 w-5 filter-input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  id="searchTerm"
+                  className="filter-input"
+                  placeholder="Nombre, email, teléfono..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por fecha
+              <label htmlFor="dateFilter" className="filter-label">
+                📅 Fecha
               </label>
-              <input
-                type="date"
-                id="dateFilter"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
+              <div className="filter-input-wrapper">
+                <svg className="h-5 w-5 filter-input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <input
+                  type="date"
+                  id="dateFilter"
+                  className="filter-input"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por estado
+              <label htmlFor="statusFilter" className="filter-label">
+                📊 Estado
               </label>
-              <select
-                id="statusFilter"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <option value="todas">Todas</option>
-                <option value="confirmada">Confirmadas</option>
-                <option value="cancelada">Canceladas</option>
-                <option value="completada">Completadas</option>
-              </select>
+              <div className="filter-input-wrapper">
+                <svg className="h-5 w-5 filter-input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                <select
+                  id="statusFilter"
+                  className="filter-input"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                >
+                  <option value="todas">Todas las reservas</option>
+                  <option value="confirmada">✅ Confirmadas</option>
+                  <option value="cancelada">❌ Canceladas</option>
+                  <option value="completada">✨ Completadas</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex items-end">
+            <div>
+              <label className="filter-label">🔄 Limpiar</label>
               <button
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                className="btn-clear"
                 onClick={() => {
                   setFilter("todas")
                   setDateFilter("")
                   setSearchTerm("")
                 }}
               >
-                Limpiar Filtros
+                Restablecer Filtros
               </button>
             </div>
           </div>
@@ -519,6 +546,8 @@ function Admin() {
       </div>
     </div>
   )
+  //hola
+  //hoalsdfalskdj 
 }
 
 export default Admin
