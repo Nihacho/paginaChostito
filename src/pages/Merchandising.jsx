@@ -1,4 +1,20 @@
+import { useCart } from '../context/CartContext'
+
 function Merchandising() {
+  const { addToCart } = useCart()
+
+  const handleAddToCart = (item) => {
+    const product = {
+      id: item.name, // puedes usar item.id si lo tuvieras
+      name: item.name,
+      price: Number(item.price),
+      image: item.image,
+      quantity: 1,
+    }
+
+    addToCart(product)
+  }
+
   return (
     <div className="container py-8">
       <br /><br /><br /><br />
@@ -26,15 +42,38 @@ function Merchandising() {
             <div className="p-4">
               <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
               <p className="text-gray-600 mb-4">{item.description}</p>
+
               <div className="flex justify-between items-center">
                 <span className="text-green-700 font-bold">{item.price} BS</span>
-                <button className="btn">Ver detalles</button>
+
+                {/* 🔥 BOTÓN MODERNO */}
+                <button
+                  onClick={() => handleAddToCart(item)}
+                  className="btn-add-cart"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="icon"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  Añadir al carrito
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Sección extra */}
       <div className="mt-16 bg-green-50 p-8 rounded">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-4">Colecciones Especiales</h2>
@@ -48,10 +87,6 @@ function Merchandising() {
               alt="Colección Navideña"
               className="card-image"
               style={{ height: "250px" }}
-              onError={(e) => {
-                e.target.onerror = null
-                e.target.src = "https://placehold.co/600x400/1e7d36/ffffff?text=Colección+Navideña"
-              }}
             />
             <div className="p-4">
               <h3 className="text-xl font-semibold mb-2">Colección Navideña</h3>
@@ -67,10 +102,6 @@ function Merchandising() {
               alt="Colección Verano"
               className="card-image"
               style={{ height: "250px" }}
-              onError={(e) => {
-                e.target.onerror = null
-                e.target.src = "https://placehold.co/600x400/1e7d36/ffffff?text=Colección+Verano"
-              }}
             />
             <div className="p-4">
               <h3 className="text-xl font-semibold mb-2">Colección Verano</h3>
@@ -116,12 +147,6 @@ const merchandiseItems = [
     price: "12.50",
     image: "https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=600",
   },
-  // {
-  //   name: "Set de Posavasos",
-  //   description: "Set de 4 posavasos con diseños inspirados en nuestros cafés más populares",
-  //   price: "9.99",
-  //   image: "https://images.unsplash.com/photo-1614632537197-38a17061c2bd?q=80&w=600",
-  // },
 ]
 
 export default Merchandising
